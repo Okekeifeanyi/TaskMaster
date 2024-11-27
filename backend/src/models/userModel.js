@@ -1,20 +1,18 @@
-import pool from '../config/db.js';
-import bcrypt from 'bcryptjs';
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
-export const createUser = async (email, password) => {
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const result = await pool.query(
-    'INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id, email',
-    [email, hashedPassword]
-  );
-  return result.rows[0];
-};
+const userSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+});
 
-export const findUserByEmail = async (email) => {
-  const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-  return result.rows[0];
-};
+userSchema.pre('save', async function (next) {
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
+  next();
+});
 
-export const comparePassword = async (password, hashedPassword) => {
-  return bcrypt.compare(password, hashedPassword);
-};
+const User = mongoose.model('User', userSchema);
+module.exports = User;

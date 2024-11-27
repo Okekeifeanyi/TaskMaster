@@ -1,25 +1,16 @@
-import { Pool } from 'pg';
-import dotenv from 'dotenv';
-import { Sequelize } from "sequelize";
+const mongoose = require('mongoose');
 
-
-// Load environment variables
-dotenv.config();
-
-// Connect to PostgreSQL database
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : undefined, // Convert port to a number
-});
-
-export const connectDB = () => {
-  pool
-    .connect()
-    .then(() => console.log('Connected to database'))
-    .catch((err) => console.error('Error connecting to database:', err));
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('MongoDB connected');
+  } catch (error) {
+    console.error('Error connecting to MongoDB:', error);
+    process.exit(1); // Exit process with failure
+  }
 };
 
-export default pool;
+module.exports = connectDB;
