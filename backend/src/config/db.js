@@ -1,25 +1,24 @@
-import { Pool } from 'pg';
-import dotenv from 'dotenv';
-import { Sequelize } from "sequelize";
+import pkg from "pg";
+const { Pool } = pkg;
 
-
-// Load environment variables
-dotenv.config();
-
-// Connect to PostgreSQL database
+// Create a connection pool
 const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : undefined, // Convert port to a number
+  user: "postgres",
+  host: "localhost",
+  database: "Enterprise-app",
+  password: "1234",
+  port: 5432,
 });
 
-export const connectDB = () => {
-  pool
-    .connect()
-    .then(() => console.log('Connected to database'))
-    .catch((err) => console.error('Error connecting to database:', err));
+// Function to connect to the database
+export const connectDB = async () => {
+  try {
+    await pool.connect();
+    console.log("Postgres connected successfully.");
+  } catch (err) {
+    console.error("Database connection error:", err.message);
+    process.exit(1); // Exit the app if there's a connection error
+  }
 };
 
-export default pool;
+export default pool; // Optional: Export the pool directly
